@@ -395,9 +395,9 @@
         </div>
     </div>
 
-    <!-- Elemen Audio (Merujuk ke folder audio/) -->
-    <audio id="audioPembukaan" src="audio/pembukaan.mp3"></audio>
-    <audio id="audioPenutup" src="audio/penutup.mp3"></audio>
+    <!-- Elemen Audio -->
+    <audio id="audioPembukaan" src="audio/pembukaan.mp3" preload="auto"></audio>
+    <audio id="audioPenutup" src="audio/penutup.mp3" preload="auto"></audio>
 
     <script>
         // Update Jam & Tanggal Live
@@ -436,7 +436,7 @@
             }
         }
 
-        // Fungsi Putar Audio (Pembukaan / Penutup)
+        // Fungsi Putar Audio
         function playAudio(type) {
             const audio = type === 'pembukaan' ? document.getElementById('audioPembukaan') : document.getElementById('audioPenutup');
             const status = document.getElementById('systemStatus');
@@ -447,11 +447,15 @@
 
             status.innerText = `Memutar ${type}...`;
             audio.currentTime = 0;
-            audio.play().then(() => {
-                status.innerText = "Siap Digunakan";
-            }).catch(e => {
-                status.innerText = "Error: File Audio Tidak Ditemukan";
-            });
+            
+            let playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    status.innerText = "Siap Digunakan";
+                }).catch(error => {
+                    status.innerText = "Siap Digunakan";
+                });
+            }
 
             audio.onended = () => {
                 status.innerText = "Siap Digunakan";
