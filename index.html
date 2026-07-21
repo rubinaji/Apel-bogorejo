@@ -342,7 +342,7 @@
             </div>
 
             <!-- Tombol Aksi Utama -->
-            <button class="btn-action secondary" onclick="playAudio('pembukaan')">
+            <button class="btn-action secondary" onclick="playAudioFile('pembukaan')">
                 <i class="fa-solid fa-music"></i> 🎵 Musik Pembukaan
             </button>
 
@@ -350,7 +350,7 @@
                 <i class="fa-solid fa-bullhorn"></i> 📢 Mulai Pengumuman
             </button>
 
-            <button class="btn-action danger" onclick="playAudio('penutup')">
+            <button class="btn-action danger" onclick="playAudioFile('penutup')">
                 <i class="fa-solid fa-flag-checkered"></i> 🎵 Musik Penutup
             </button>
 
@@ -395,17 +395,10 @@
         </div>
     </div>
 
-    <!-- Elemen Audio dengan jalur absolut/relatif aman -->
-    <audio id="audioPembukaan" preload="auto">
-        <source src="./audio/pembukaan.mp3" type="audio/mpeg">
-        Browser Anda tidak mendukung elemen audio.
-    </audio>
-    <audio id="audioPenutup" preload="auto">
-        <source src="./audio/penutup.mp3" type="audio/mpeg">
-        Browser Anda tidak mendukung elemen audio.
-    </audio>
-
     <script>
+        // Variabel global untuk objek Audio agar tidak tertumpuk
+        let currentAudio = null;
+
         // Update Jam & Tanggal Live
         function updateClock() {
             const now = new Date();
@@ -442,34 +435,36 @@
             }
         }
 
-        // Fungsi Putar Audio dengan Penanganan Aman
-        function playAudio(type) {
-            const audioPembukaan = document.getElementById('audioPembukaan');
-            const audioPenutup = document.getElementById('audioPenutup');
+        // Fungsi Pemutar File Audio dengan JavaScript Dinamis
+        function playAudioFile(type) {
+            const status = document.getElementById('systemStatus');
             
             // Hentikan suara AI jika sedang berjalan
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
             }
 
-            // Hentikan audio lain terlebih dahulu
-            audioPembukaan.pause();
-            audioPenutup.pause();
+            // Hentikan audio sebelumnya jika ada
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
 
-            const targetAudio = type === 'pembukaan' ? audioPembukaan : audioPenutup;
-            const status = document.getElementById('systemStatus');
-            
+            // Tentukan jalur file berdasarkan tipe
+            let fileName = type === 'pembukaan' ? 'audio/pembukaan.mp3' : 'audio/penutup.mp3';
+
             status.innerText = `Memutar ${type}...`;
-            targetAudio.currentTime = 0;
             
-            targetAudio.play().then(() => {
-                status.innerText = "Siap Digunakan";
+            currentAudio = new Audio(fileName);
+            
+            currentAudio.play().then(() => {
+                status.innerText = `Memutar ${type} selesai / Berjalan`;
             }).catch(error => {
-                console.log("Audio play error:", error);
-                status.innerText = "Siap Digunakan";
+                console.error("Gagal memutar audio:", error);
+                status.innerText = "Error: File Audio Gagal Dimuat";
             });
 
-            targetAudio.onended = () => {
+            currentAudio.onended = () => {
                 status.innerText = "Siap Digunakan";
             };
         }
@@ -478,8 +473,11 @@
         function jalankanPengumumanFull() {
             const status = document.getElementById('systemStatus');
             
-            document.getElementById('audioPembukaan').pause();
-            document.getElementById('audioPenutup').pause();
+            // Hentikan musik yang sedang berjalan
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
 
             status.innerText = "Membaca Pengumuman...";
             
