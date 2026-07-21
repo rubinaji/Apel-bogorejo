@@ -357,7 +357,7 @@
             <!-- Status Sistem Card -->
             <div class="card">
                 <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">Status Sistem</div>
-                    <div class="status-badge" id="systemStatus">Siap Digunakan</div>
+                <div class="status-badge" id="systemStatus">Siap Digunakan</div>
             </div>
         </div>
 
@@ -434,7 +434,7 @@
             }
         }
 
-        // Fungsi Pemutar File Audio dengan Penanganan Jalur Fleksibel
+        // Fungsi Pemutar File Audio dengan Jalur Absolut GitHub Pages
         function playAudioFile(type) {
             const status = document.getElementById('systemStatus');
             
@@ -447,8 +447,9 @@
                 currentAudio = null;
             }
 
-            // Mendukung jalur lokal dan github pages repository subdirectory
-            let fileName = type === 'pembukaan' ? 'audio/pembukaan.mp3' : 'audio/penutup.mp3';
+            // Jalur absolut menyesuaikan nama repositori GitHub Pages Anda (/Apel-bogorejo/)
+            let basePath = window.location.hostname.includes('github.io') ? '/Apel-bogorejo' : '';
+            let fileName = type === 'pembukaan' ? `${basePath}/audio/pembukaan.mp3` : `${basePath}/audio/penutup.mp3`;
 
             status.innerText = `Memutar ${type}...`;
             
@@ -457,15 +458,14 @@
             currentAudio.play().then(() => {
                 status.innerText = "Siap Digunakan";
             }).catch(error => {
-                console.warn("Mencoba jalur alternatif...");
-                // Jalur cadangan jika diakses melalui root path repo GitHub Pages
-                let altName = type === 'pembukaan' ? './audio/pembukaan.mp3' : './audio/penutup.mp3';
-                currentAudio = new Audio(altName);
+                // Cadangan jalur relatif jika jalur absolut gagal
+                let fallbackName = type === 'pembukaan' ? 'audio/pembukaan.mp3' : 'audio/penutup.mp3';
+                currentAudio = new Audio(fallbackName);
                 currentAudio.play().then(() => {
                     status.innerText = "Siap Digunakan";
                 }).catch(err => {
                     status.innerText = "Siap Digunakan";
-                    alert(`Gagal memutar file audio. Pastikan file ${type}.mp3 sudah di-upload ke dalam folder 'audio' di GitHub.`);
+                    alert(`Gagal memutar audio. Pastikan file ${type}.mp3 ada di folder 'audio'.`);
                 });
             });
 
