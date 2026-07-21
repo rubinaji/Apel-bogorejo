@@ -436,7 +436,7 @@
             }
         }
 
-        // Fungsi Putar Audio
+        // Fungsi Putar Audio dengan Penanganan Error yang Aman
         function playAudio(type) {
             const audio = type === 'pembukaan' ? document.getElementById('audioPembukaan') : document.getElementById('audioPenutup');
             const status = document.getElementById('systemStatus');
@@ -448,14 +448,12 @@
             status.innerText = `Memutar ${type}...`;
             audio.currentTime = 0;
             
-            let playPromise = audio.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    status.innerText = "Siap Digunakan";
-                }).catch(error => {
-                    status.innerText = "Siap Digunakan";
-                });
-            }
+            audio.play().then(() => {
+                status.innerText = "Siap Digunakan";
+            }).catch(error => {
+                // Diabaikan agar status tidak error di layar pengguna
+                status.innerText = "Siap Digunakan";
+            });
 
             audio.onended = () => {
                 status.innerText = "Siap Digunakan";
@@ -475,7 +473,7 @@
             const jam = now.getHours();
             const menit = now.getMinutes();
             
-            let teksPengumuman = `Assalamu'alaikum warahmatullahi wabarakatuh. Selamat pagi. Terima kasih kepada Bapak dan Ibu yang telah mempercayakan pelayanan kesehatannya di Puskesmas Bogorejo. Saat ini waktu menunjukkan pukul ${jam} lewat ${menit} menit Waktu Indonesia Barat. Kami menginformasikan kepada seluruh petugas Puskesmas Bogorejo agar segera menuju halaman apel untuk mengikuti apel pagi. Sekali lagi, kepada seluruh petugas Puskesmas Bogorejo, dimohon segera menuju halaman apel untuk mengikuti apel pagi. Atas perhatian dan kerja samanya, kami ucapkan terima kasih.`;
+            let teksPengumuman = `Assalamu'alaikum warahmatullahi wabarakatuh. Selamat pagi. Terima kasih kepada Bapak dan Ibu yang telah mempercayakan pelayanan kesehatannya di Puskesmas Bogorejo. Saat ini waktu menunjukkan pukul ${jam} lewat ${menit} menit Waktu Indonesia Barat. Kami menginformasikan kepada seluruh petugas Puskesmas Bogorejo agar segera menuju halaman apel untuk mengikuti apel pagi. Sekali lagi, kepada seluruh petugas Puskesmas Bogorejo, dimohon segera menuju halaman apel untuk mengikuti apel pagi. Atas perhatian dan kerja samanya, kami ucapkan terima kasih. Wassalamu'alaikum warahmatullahi wabarakatuh.`;
 
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel(); 
