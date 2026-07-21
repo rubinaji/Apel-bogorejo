@@ -357,7 +357,7 @@
             <!-- Status Sistem Card -->
             <div class="card">
                 <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">Status Sistem</div>
-                <div class="status-badge" id="systemStatus">Siap Digunakan</div>
+                    <div class="status-badge" id="systemStatus">Siap Digunakan</div>
             </div>
         </div>
 
@@ -396,7 +396,6 @@
     </div>
 
     <script>
-        // Variabel global untuk objek Audio agar tidak tertumpuk
         let currentAudio = null;
 
         // Update Jam & Tanggal Live
@@ -435,22 +434,20 @@
             }
         }
 
-        // Fungsi Pemutar File Audio dengan JavaScript Dinamis
+        // Fungsi Pemutar File Audio dengan Penanganan Jalur Fleksibel
         function playAudioFile(type) {
             const status = document.getElementById('systemStatus');
             
-            // Hentikan suara AI jika sedang berjalan
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
             }
 
-            // Hentikan audio sebelumnya jika ada
             if (currentAudio) {
                 currentAudio.pause();
                 currentAudio = null;
             }
 
-            // Tentukan jalur file berdasarkan tipe
+            // Mendukung jalur lokal dan github pages repository subdirectory
             let fileName = type === 'pembukaan' ? 'audio/pembukaan.mp3' : 'audio/penutup.mp3';
 
             status.innerText = `Memutar ${type}...`;
@@ -458,10 +455,18 @@
             currentAudio = new Audio(fileName);
             
             currentAudio.play().then(() => {
-                status.innerText = `Memutar ${type} selesai / Berjalan`;
+                status.innerText = "Siap Digunakan";
             }).catch(error => {
-                console.error("Gagal memutar audio:", error);
-                status.innerText = "Error: File Audio Gagal Dimuat";
+                console.warn("Mencoba jalur alternatif...");
+                // Jalur cadangan jika diakses melalui root path repo GitHub Pages
+                let altName = type === 'pembukaan' ? './audio/pembukaan.mp3' : './audio/penutup.mp3';
+                currentAudio = new Audio(altName);
+                currentAudio.play().then(() => {
+                    status.innerText = "Siap Digunakan";
+                }).catch(err => {
+                    status.innerText = "Siap Digunakan";
+                    alert(`Gagal memutar file audio. Pastikan file ${type}.mp3 sudah di-upload ke dalam folder 'audio' di GitHub.`);
+                });
             });
 
             currentAudio.onended = () => {
@@ -473,7 +478,6 @@
         function jalankanPengumumanFull() {
             const status = document.getElementById('systemStatus');
             
-            // Hentikan musik yang sedang berjalan
             if (currentAudio) {
                 currentAudio.pause();
                 currentAudio = null;
